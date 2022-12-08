@@ -10,6 +10,7 @@ class ChunkUpload {
             fileSize: parseInt(props.fileSize),
             fileIdentity: this.generateFileIdentity(),
             fileShortId: null,
+            fileType: String(props.fileType),
             destinationPath: RNFS.TemporaryDirectoryPath,
             totalNumber: 0
         };
@@ -91,7 +92,8 @@ class ChunkUpload {
                     number: index,
                     path,
                     headers: this.getHeaders(index),
-                    blob: this.getBlobObject(path)
+                    blob: this.getBlobObject(path),
+                    type: this.fileType
                 };
             })
             .catch(e => {
