@@ -14,6 +14,7 @@ declare namespace ChunkUpload {
         size: number;
         fileName: string;
         fileSize: number;
+        fileType: string;
     }
 
     export type Event = (
@@ -27,15 +28,18 @@ declare namespace ChunkUpload {
         path: string;
         headers: Header;
         blob: Blob;
+        type: string;
     }
 
     export interface Header {
-        "x-chunk-number": number;
-        "x-chunk-total-number": number;
-        "x-chunk-size": number;
-        "x-file-name": string;
-        "x-file-size": number;
-        "x-file-identity": string;
+        "resumableChunkNumber": number;
+        "resumableTotalChunks": number;
+        "resumableChunkSize": number;
+        "resumableFilename": string;
+        "resumableTotalSize": number;
+        "resumableIdentifier": string;
+        "resumableCurrentChunkSize": string;
+        "resumableType": string;
     }
 
     export interface Blob {
