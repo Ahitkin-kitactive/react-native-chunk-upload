@@ -10,7 +10,6 @@ class ChunkUpload {
             fileSize: parseInt(props.fileSize),
             fileIdentity: this.generateFileIdentity(),
             fileShortId: null,
-            fileType: String(props.fileType),
             destinationPath: RNFS.TemporaryDirectoryPath,
             totalNumber: 0
         };
@@ -18,6 +17,7 @@ class ChunkUpload {
         this.chunks = [];
         this.level = 0;
         this.file = null;
+        this.fileType = props.fileType;
 
         this.data.fileShortId = this.data.fileIdentity.substr(0, 10);
         this.data.totalNumber = this.getTotalNumber();
@@ -127,12 +127,14 @@ class ChunkUpload {
 
     getHeaders(index) {
         return {
-            "x-chunk-number" : index,
-            "x-chunk-total-number" : this.data.totalNumber,
-            "x-chunk-size" : this.data.size,
-            "x-file-name" : this.data.fileName,
-            "x-file-size" : this.data.fileSize,
-            "x-file-identity" : this.data.fileIdentity
+            "resumableChunkNumber" : index,
+            "resumableTotalChunks" : this.data.totalNumber,
+            "resumableChunkSize" : this.data.size,
+            "resumableFilename" : this.data.fileName,
+            "resumableTotalSize" : this.data.fileSize,
+            "resumableIdentifier" : this.data.fileIdentity,
+            "resumableCurrentChunkSize": this.data.size,
+            "resumableType": this.fileType,
         }
     }
 
