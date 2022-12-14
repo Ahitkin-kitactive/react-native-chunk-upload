@@ -5,6 +5,7 @@ class ChunkUpload {
     constructor(props) {
         this.data = {
             path: String(props.path),
+            sparePath: String(props.sparePath),
             size: parseInt(props.size),
             fileName: String(props.fileName),
             fileSize: parseInt(props.fileSize),
@@ -18,6 +19,8 @@ class ChunkUpload {
         this.level = 0;
         this.file = null;
         this.fileType = props.fileType;
+        this.isRetried = false
+        this.files = []
 
         this.data.fileShortId = this.data.fileIdentity.substr(0, 10);
         this.data.totalNumber = this.getTotalNumber();
@@ -27,16 +30,17 @@ class ChunkUpload {
         this.onWriteFileError = props.onWriteFileError;
     }
 
-    digIn(event = () => {}) {
+    digIn(event = () => {}, files) {
         this.event = event;
-
+        this.files = files
         this.getBase64Chunks();
     }
 
     async getBase64Chunks() {
+        const path = this.isRetried ? this.data.sparePath : this.data.path
         let i = 0;
         await RNFetchBlob.fs.readStream(
-            this.data.path,
+            path,
             'base64',
             this.data.size
         )
@@ -51,7 +55,14 @@ class ChunkUpload {
                         this.next();
                 });
 
-                ifstream.onError(e => this.onFetchBlobError(e));
+                ifstream.onError(e => {
+                    if (!this.isRetried) {
+                        this.isRetried = true
+                        this.getBase64Chunks()
+                    } else {
+                        this.onFetchBlobError()
+                    }
+                });
 
                 ifstream.onEnd(() => {
                     //
@@ -59,7 +70,10 @@ class ChunkUpload {
             });
     }
 
-    async next() {
+    async next(files) {
+        if (files) {
+            this.files = files
+        }
         this.level++;
 
         if (this.level > 1) {
@@ -104,7 +118,7 @@ class ChunkUpload {
     }
 
     eject() {
-        this.event(this.file, this.next.bind(this), this.retry.bind(this), this.unlink.bind(this));
+        this.event(this.file, this.next.bind(this), this.retry.bind(this), this.unlink.bind(this), this.files);
     }
 
     async unlink(path) {
